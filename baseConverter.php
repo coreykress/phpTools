@@ -72,6 +72,64 @@ $base64Alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/
 $value = "49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d";
 //SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11c2hyb29t
 
-var_dump($convertCustomBases($value, $hexAlpha, $base64Alpha));
+// var_dump($convertCustomBases($value, $hexAlpha, $base64Alpha));
+
+//part 2
+ /**
+ *Write a function that takes two equal-length buffers and produces their XOR combination.
+ *
+ *If your function works properly, then when you feed it the string:
+ *
+ *1c0111001f010100061a024b53535009181c
+ *... after hex decoding, and when XOR'd against:
+ *
+ *686974207468652062756c6c277320657965
+ *... should produce:
+ *
+ *746865206b696420646f6e277420706c6179
+ **/
+
+$hexA = "1c0111001f010100061a024b53535009181c";
+$hexB = "686974207468652062756c6c277320657965";
+
+$convertToBinary = function ($value, $alphabetIn) use ($convertCustomBases) {
+    return $convertCustomBases($value, $alphabetIn, "01");
+};
+
+$convertFromBinary = function ($value, $alphabetOut) use ($convertCustomBases) {
+    return $convertCustomBases($value, "01", $alphabetOut);
+};
+
+$hexABinary = $convertToBinary($hexA, $hexAlpha);
+$hexBBinary = $convertToBinary($hexB, $hexAlpha);
+
+//xor a or b = true, not a and not b = false, a and b = false
+$xOrBinaryStrings = function ($a, $b) {
+    if (strlen($a) !== strlen($b)) {
+        while (strlen($a) !== strlen($b)) {
+            if (strlen($a) < strlen($b)) {
+                $a = "0" . $a;
+            }elseif (strlen($a) > strlen($b)) {
+                $b = "0" . $b;
+            } else {
+                return "ERROR WITH STRING LENGTHS";
+                die();
+            }
+        }
+    }
+
+    var_dump($a, $b);
+    $xOrString = "";
+    for ($i = strlen($a) - 1; $i >= 0; $i--) {
+        $xOrString = ($a[$i] === $b[$i] ? "0" : "1") . $xOrString;
+    }
+
+    return $xOrString;
+};
+
+$binaryXOR = $xOrBinaryStrings($hexABinary, $hexBBinary);
+$xOrValue = $convertFromBinary($binaryXOR, $hexAlpha);
+
+var_dump($xOrValue);
 
  ?>
