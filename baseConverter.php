@@ -67,6 +67,7 @@ $convertCustomBases = function ($value, $alphabetIn, $alphabetOut) use ($testAlp
     return $outgoingBaseValue;
 };
 
+$base10Alpha = "0123456789";
 $hexAlpha = "0123456789abcdef";
 $base64Alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 $value = "49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d";
@@ -118,7 +119,6 @@ $xOrBinaryStrings = function ($a, $b) {
         }
     }
 
-    var_dump($a, $b);
     $xOrString = "";
     for ($i = strlen($a) - 1; $i >= 0; $i--) {
         $xOrString = ($a[$i] === $b[$i] ? "0" : "1") . $xOrString;
@@ -130,6 +130,57 @@ $xOrBinaryStrings = function ($a, $b) {
 $binaryXOR = $xOrBinaryStrings($hexABinary, $hexBBinary);
 $xOrValue = $convertFromBinary($binaryXOR, $hexAlpha);
 
-var_dump($xOrValue);
+// var_dump($xOrValue);
+
+//part 3
+// Single-byte XOR cipher
+// The hex encoded string:
+//
+// 1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736
+// ... has been XOR'd against a single character. Find the key, decrypt the message.
+//
+// You can do this by hand. But don't: write code to do it for you.
+//
+// How? Devise some method for "scoring" a piece of English plaintext. Character frequency is a good metric.
+// Evaluate each output and choose the one with the best score.
+
+//https://en.wikipedia.org/wiki/Letter_frequency
+//n-gram?
+//is it one char, or a repeated string of that char.  I would assume just one?
+//the char should be the ascii value of it in binary
+//ord(), ascii value of char
+//XOR is reverse of XOR
+
+$orderOfMostCommonCharsInEnglish = "etaoinshrdlcumwfgypbvkjxqz";
+$encodedHexString = "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736";
+
+$encodedStringBinary = $convertToBinary($encodedHexString, $hexAlpha);
+
+//inital concept, just run down the most common char list
+foreach (str_split($orderOfMostCommonCharsInEnglish) as $char) {
+    $charBinary = $convertToBinary(ord($char), $base10Alpha);
+    $reps = ceil(strlen($encodedStringBinary) / 8);
+    $charBinaryString = $charBinary;
+    for ($j = 0; $j < $reps; $j++) {
+        $charBinaryString .= $charBinary;
+    }
+    // var_dump(strlen($charBinaryString), strlen($encodedStringBinary));
+    $decodedBinary = $xOrBinaryStrings($encodedStringBinary, $charBinaryString);
+    //convert this to ascii, readable english
+    var_dump(strlen($decodedBinary));
+    while (strlen($decodedBinary) % 8 != 0) {
+        $decodedBinary = "0" . $decodedBinary;
+    }
+    $englishString = "";
+    //grab in groups of 8 bits, convert to dec, look up in ascii chart or php function chr()
+    while (strlen($decodedBinary) > 0) {
+        $newCharBinary = substr($decodedBinary, -8);
+        $asciiChar = chr($convertFromBinary($newCharBinary, $base10Alpha));
+        $englishString = $asciiChar . $englishString;
+// var_dump();
+        $decodedBinary = substr($decodedBinary, 0, -8);
+    }
+    // var_dump($englishString);
+}
 
  ?>
